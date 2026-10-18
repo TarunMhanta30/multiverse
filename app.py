@@ -38,7 +38,7 @@ from rehearse import drop, fingerprint
 from scenarios import presets, two_agents
 
 UI = HERE / "ui"
-PORT = 8765
+PORT = int(os.environ.get("PORT", "8765"))
 ACTOR = "console"
 LINK_RE = re.compile(r"^(?P<a>\S+?)(?: -|\|)(?P<rel>[A-Z_]+)(?:-> |\|)(?P<b>\S+)$")
 EXECUTIONS = {}          # rid -> result of an execution started from the console
@@ -599,4 +599,4 @@ if __name__ == "__main__":
         print("The company graph is missing: building it from the evidence files...")
         world_builder.build()
     print(f"Multiverse console: http://localhost:{PORT}   (FalkorDB at {HOST}:{DB_PORT})")
-    uvicorn.run(app, host="127.0.0.1", port=PORT, log_level="warning")
+    uvicorn.run(app, host=os.environ.get("BIND_HOST", "127.0.0.1"), port=PORT, log_level="warning")

@@ -6,4 +6,4 @@ data/online-boutique/kubernetes-manifests.yaml -text
 data/online-boutique/** linguist-vendored
 ui/lib/** linguist-vendored
 ui/icons.js linguist-generated
-data/backoffice/access_log.csv linguist-generated
+data/backoffice/access_log.csv linguist-generated*.sh text eol=lf

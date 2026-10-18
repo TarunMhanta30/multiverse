@@ -1,0 +1,35 @@
+# Boutique Inc. - who owns what.  SYNTHETIC (invented for the Multiverse demo).
+# Format: <asset>  @<team>
+
+frontend                  @storefront
+adservice                 @storefront
+recommendationservice     @storefront
+
+checkoutservice           @checkout
+cartservice               @checkout
+redis-cart                @checkout
+paymentservice            @checkout
+shippingservice           @checkout
+emailservice              @checkout
+payment_gateway_key       @checkout
+smtp_credentials          @checkout
+orders_db                 @checkout
+
+productcatalogservice     @catalog
+currencyservice           @catalog
+
+loadgenerator             @platform
+orders_replica            @platform
+
+month_end_billing         @finance
+payouts                   @finance
+legacy_orders_db          @finance
+tax_filing_job            @finance
+orders_archive            @finance
+refund_script             @finance
+
+nightly_analytics_export  @data
+analytics_warehouse       @data
+reporting_dashboard       @data
+revenue_report            @data
+old_csv_export            @data

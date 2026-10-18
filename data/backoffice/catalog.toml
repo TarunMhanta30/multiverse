@@ -1,0 +1,297 @@
+# Boutique Inc. - service tiers, back office, declared dependencies, load test.
+#
+# SYNTHETIC. Everything in this file was invented for the Multiverse demo:
+# Online Boutique has no back office, no owners, no tiers and no load-test numbers.
+# The real part of the company (the 12 Kubernetes deployments and who calls whom)
+# comes from data/online-boutique/kubernetes-manifests.yaml, not from here.
+# The one-line notes on the 12 real services paraphrase the Online Boutique README.
+
+[company]
+name = "Boutique Inc."
+
+[traffic]                       # used by launch rehearsals
+entry = "frontend"              # where customer traffic arrives
+base_rps = 40                   # normal evening peak, requests per second at the entry
+
+
+# ---------------------------------------------------------------------------------------
+# Tiers for the real services (1 = nice to have ... 3 = the business stops without it),
+# plus calls the caller survives without ("soft": the page still works, just degraded).
+# ---------------------------------------------------------------------------------------
+[services.frontend]
+criticality = 3
+soft_calls = ["adservice", "recommendationservice"]   # page renders without ads or recommendations
+note = "The shop's website. Every shopper's request arrives here first."
+
+[services.checkoutservice]
+criticality = 3
+soft_calls = ["emailservice"]                          # order completes even if the email fails
+note = "Places the order: takes the cart, charges the card, books shipping."
+
+[services.cartservice]
+criticality = 3
+note = "Keeps each shopper's cart (stored in redis-cart)."
+
+[services.productcatalogservice]
+criticality = 3
+note = "The list of products, and product search."
+
+[services.paymentservice]
+criticality = 3
+note = "Charges the shopper's card."
+
+[services.currencyservice]
+criticality = 2
+note = "Converts prices into the shopper's currency."
+
+[services.shippingservice]
+criticality = 2
+note = "Shipping quotes, and ships the order."
+
+[services.redis-cart]
+criticality = 3
+note = "The Redis database that stores every cart."
+
+[services.recommendationservice]
+criticality = 1
+note = "Suggests other products to buy."
+
+[services.adservice]
+criticality = 1
+note = "Shows small text ads on the pages."
+
+[services.emailservice]
+criticality = 1
+note = "Sends the order confirmation email."
+
+[services.loadgenerator]
+criticality = 1
+note = "Pretends to be shoppers so the shop gets traffic (part of the demo app)."
+
+
+# ---------------------------------------------------------------------------------------
+# Back-office assets (all synthetic).
+# schedule: "daily@HH:MM", "weekly:mon@HH:MM", "monthly:day=D@HH:MM", "quarterly@HH:MM",
+#           or "" for jobs people run by hand (their rhythm is learned from the access log).
+# ---------------------------------------------------------------------------------------
+[assets.payouts]
+kind = "Service"
+criticality = 3
+note = "Pays the sellers once month-end billing has run."
+
+[assets.reporting_dashboard]
+kind = "Service"
+criticality = 1
+note = "Internal sales dashboard."
+
+[assets.orders_db]
+kind = "Datastore"
+engine = "postgres"
+criticality = 3
+capacity_ops = 30               # writes per second it sustained in the load test
+note = "The main order database."
+
+[assets.orders_replica]
+kind = "Datastore"
+engine = "postgres"
+criticality = 2
+note = "Read-only copy of orders_db, used by reports and finance jobs."
+
+[assets.legacy_orders_db]
+kind = "Datastore"
+engine = "postgres"
+criticality = 2
+note = "The old orders database. Looks unused. Isn't: month-end billing still reads it."
+
+[assets.orders_archive]
+kind = "Datastore"
+engine = "postgres"
+criticality = 1
+note = "Orders from past years, archived. Nobody is sure who still reads it."
+
+[assets.old_csv_export]
+kind = "Datastore"
+engine = "csv bucket"
+criticality = 1
+note = "A one-off CSV export. Nobody remembers why it exists."
+
+[assets.analytics_warehouse]
+kind = "Datastore"
+engine = "bigquery"
+criticality = 2
+note = "Analytics warehouse that the dashboard and reports read."
+
+[assets.month_end_billing]
+kind = "Job"
+schedule = "monthly:day=1@02:00"
+duration_min = 45
+criticality = 3
+note = "Bills every seller on the 1st of the month."
+
+[assets.tax_filing_job]
+kind = "Job"
+schedule = "quarterly@03:00"
+duration_min = 60
+criticality = 3
+note = "Files the company's taxes every quarter."
+
+[assets.nightly_analytics_export]
+kind = "Job"
+schedule = "daily@05:00"
+duration_min = 30
+criticality = 2
+note = "Copies the day's orders into the analytics warehouse every night."
+
+[assets.revenue_report]
+kind = "Job"
+schedule = ""
+criticality = 1
+note = "Revenue report that analysts run by hand."
+
+[assets.refund_script]
+kind = "Job"
+schedule = ""
+criticality = 2
+note = "Old refund script that Finance runs by hand once in a while."
+
+[assets.payment_gateway_key]
+kind = "Secret"
+criticality = 3
+note = "API key for the card payment gateway."
+
+[assets.smtp_credentials]
+kind = "Secret"
+criticality = 1
+note = "Login for the email server."
+
+
+# ---------------------------------------------------------------------------------------
+# Declared dependencies. "verified = true" means the owning team signed it off.
+# Links that jobs use on datastores get their confidence from the access log instead,
+# so the log can also show links nobody declared (and declared links nobody uses).
+# ---------------------------------------------------------------------------------------
+[[links]]
+from = "checkoutservice"
+rel = "WRITES"
+to = "orders_db"
+verified = true
+note = "Synthetic link on a real service: real Online Boutique keeps no order database."
+
+[[links]]
+from = "orders_replica"
+rel = "FED_BY"
+to = "orders_db"
+verified = true
+note = "Replication: the replica goes stale if orders_db stops."
+
+[[links]]
+from = "analytics_warehouse"
+rel = "FED_BY"
+to = "nightly_analytics_export"
+verified = true
+note = "The warehouse goes stale if the nightly export stops."
+
+[[links]]
+from = "payouts"
+rel = "DEPENDS_ON"
+to = "month_end_billing"
+verified = true
+
+[[links]]
+from = "reporting_dashboard"
+rel = "READS"
+to = "analytics_warehouse"
+verified = true
+
+[[links]]
+from = "paymentservice"
+rel = "USES_SECRET"
+to = "payment_gateway_key"
+verified = true
+
+[[links]]
+from = "emailservice"
+rel = "USES_SECRET"
+to = "smtp_credentials"
+verified = true
+
+[[links]]
+from = "refund_script"
+rel = "USES_SECRET"
+to = "payment_gateway_key"
+verified = false
+declared = 2025-03-10
+note = "Listed in an old runbook. Secret use is not recorded in the access log."
+
+[[links]]
+from = "month_end_billing"
+rel = "READS"
+to = "legacy_orders_db"
+
+[[links]]
+from = "tax_filing_job"
+rel = "READS"
+to = "orders_replica"
+
+[[links]]
+from = "tax_filing_job"
+rel = "READS"
+to = "orders_archive"
+
+[[links]]
+from = "nightly_analytics_export"
+rel = "READS"
+to = "orders_replica"
+
+[[links]]
+from = "nightly_analytics_export"
+rel = "WRITES"
+to = "analytics_warehouse"
+
+[[links]]
+from = "revenue_report"
+rel = "READS"
+to = "analytics_warehouse"
+
+[[links]]
+from = "refund_script"
+rel = "READS"
+to = "orders_db"
+
+
+# ---------------------------------------------------------------------------------------
+# Load test (synthetic). Capacity of a service = replicas x CPU limit (both from the real
+# Kubernetes file) x requests per CPU-core-second measured here.
+# ---------------------------------------------------------------------------------------
+[loadtest.rps_per_core]
+frontend = 1600
+currencyservice = 1815
+productcatalogservice = 2100
+cartservice = 327
+recommendationservice = 560
+adservice = 480
+shippingservice = 400
+checkoutservice = 100
+paymentservice = 45
+emailservice = 120
+redis-cart = 1792
+
+# Average calls the caller makes to the dependency for every request it handles.
+[loadtest.calls_per_request]
+"frontend>currencyservice" = 1.5
+"frontend>productcatalogservice" = 1.2
+"frontend>cartservice" = 0.6
+"frontend>recommendationservice" = 0.4
+"frontend>adservice" = 0.4
+"frontend>shippingservice" = 0.1
+"frontend>checkoutservice" = 0.05
+"checkoutservice>cartservice" = 2
+"checkoutservice>productcatalogservice" = 3
+"checkoutservice>currencyservice" = 3
+"checkoutservice>shippingservice" = 2
+"checkoutservice>paymentservice" = 1
+"checkoutservice>emailservice" = 1
+"checkoutservice>orders_db" = 1
+"recommendationservice>productcatalogservice" = 1
+"cartservice>redis-cart" = 1.4
+"loadgenerator>frontend" = 1

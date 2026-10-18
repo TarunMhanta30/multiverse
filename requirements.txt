@@ -1,0 +1,3 @@
+falkordb
+mcp
+pyyaml

@@ -1,0 +1,9 @@
+* text=auto
+*.woff2 binary
+*.png binary
+# Google's file is kept byte for byte (its SHA-256 is in data/online-boutique/SOURCE.md)
+data/online-boutique/kubernetes-manifests.yaml -text
+data/online-boutique/** linguist-vendored
+ui/lib/** linguist-vendored
+ui/icons.js linguist-generated
+data/backoffice/access_log.csv linguist-generated

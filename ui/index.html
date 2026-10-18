@@ -1,0 +1,440 @@
+<!doctype html>
+<!-- Multiverse console, build 5 (editorial) -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#e9e7e1">
+  <meta name="description" content="Multiverse rehearses what an AI agent wants to do in many copies of the company graph before it touches the real one.">
+  <title>Multiverse</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23111110'/%3E%3Cg fill='none' stroke='%23e9e7e1' stroke-width='2'%3E%3Cpath d='M6 20l10 5 10-5'/%3E%3Cpath d='M6 15l10 5 10-5' opacity='.6'/%3E%3Cpath d='M6 10l10-5 10 5-10 5z'/%3E%3C/g%3E%3C/svg%3E">
+  <link rel="preload" href="/static/fonts/archivo-latin-wdth-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/static/style.css?v=5">
+  <script type="importmap">{ "imports": { "three": "/static/lib/three.module.min.js" } }</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs id="sil-defs"></defs>
+  <defs>
+    <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#4a4843"/><line x1="0" y1="0" x2="0" y2="6" stroke="#8d8a83" stroke-width="2.2"/></pattern>
+  </defs>
+</svg>
+<div class="grain" aria-hidden="true"></div>
+<div class="intro" id="intro" aria-hidden="true" hidden>
+  <div class="intro-top"><span>Rehearsals for AI agents</span><span>Graph Hacks ©2026</span></div>
+  <div class="intro-word"><span>Multi</span><span>verse</span></div>
+  <div class="intro-foot"><span class="intro-note">Forking the company graph</span><span class="intro-count" id="intro-count">0</span></div>
+  <div class="intro-bar"><i id="intro-bar"></i></div>
+</div>
+<script>
+  try {
+    if (sessionStorage.getItem("mv-intro") !== "1" && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      document.getElementById("intro").hidden = false;
+      document.body.classList.add("intro-on", "intro-delay");
+      setTimeout(function () { var b = document.getElementById("intro"); if (b && !b.classList.contains("lift")) { b.hidden = true; document.body.classList.remove("intro-on"); } }, 5000);
+    }
+  } catch (e) { /* storage blocked: no intro */ }
+</script>
+
+<!-- ========================================================================= top bar -->
+<header class="top" id="top">
+  <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="menu">
+    <span class="dot" id="live-dot" aria-hidden="true"></span>
+    <span class="menu-word">Menu</span><span class="burger" aria-hidden="true"><i></i><i></i><i></i></span>
+  </button>
+  <a class="logo" href="#/" aria-label="Multiverse home">
+    <svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 21l11 5.5L27 21"/><path d="M5 16l11 5.5L27 16" opacity=".55"/><path d="M5 10.5 16 5l11 5.5L16 16z"/></g></svg>
+    <span class="logo-word">Multiverse</span>
+  </a>
+  <nav class="top-nav" id="nav" aria-label="Pages"></nav>
+  <div class="top-tools">
+    <button class="tool-btn" id="open-palette" type="button" aria-label="Search or run a command (Ctrl+K)"><svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg><kbd>Ctrl K</kbd></button>
+  </div>
+</header>
+
+<!-- ========================================================================= full-screen menu -->
+<div class="menu" id="menu" hidden>
+  <div class="menu-inner">
+    <nav class="menu-links" id="menu-links" aria-label="All pages"></nav>
+    <div class="menu-side">
+      <p class="menu-label">Status</p>
+      <div class="status-line"><span class="dot" id="db-dot"></span><span id="db-line">Connecting to FalkorDB…</span></div>
+      <div class="status-line"><span class="dot" id="live-dot2"></span><span id="live-line">Live updates</span></div>
+      <div class="status-line"><span class="dot" id="agents-dot"></span><span id="agents-line">No agents yet</span></div>
+      <div class="menu-actions">
+        <button class="btn invert" id="start-tour" type="button"><span class="i-tour"></span>Take the tour</button>
+        <button class="btn ghost-invert" id="reset" type="button"><span class="i-reset"></span>Reset the demo</button>
+      </div>
+      <p class="menu-note">Multiverse — rehearsals for AI agents. Built on FalkorDB for Graph Hacks 2026.</p>
+    </div>
+  </div>
+</div>
+<div class="wipe" id="wipe" aria-hidden="true"></div>
+
+<main id="main" tabindex="-1">
+  <!-- ======================================================================= HOME -->
+  <section class="page home" data-page="home" aria-labelledby="h-home">
+    <div class="home-grid">
+      <div class="h-col h-left">
+        <div class="cell h-intro rv">
+          <p class="h-title">Rehearsals for<br>AI agents<br>©2026</p>
+          <p class="h-desc">Before an AI agent deletes, migrates or launches anything, Multiverse plays the change in hundreds of copies of your company graph and counts what breaks.</p>
+        </div>
+        <div class="cell h-stat rv">
+          <span class="h-num" id="h-assets" data-count="27">27</span>
+          <span class="h-stat-l">assets and <b id="h-links">33</b> links, built only from evidence files</span>
+        </div>
+        <div class="cell h-head rv">
+          <span class="plus p-tr" aria-hidden="true"></span>
+          <h1 id="h-home" class="split">Rehearse the future before it happens</h1>
+          <span class="plus p-bl" aria-hidden="true"></span>
+        </div>
+      </div>
+
+      <div class="cell h-center rv" id="hero">
+        <div class="h-dots" aria-hidden="true"></div>
+        <div class="h-giant" aria-hidden="true"><span>M</span><span>V</span></div>
+        <div class="h-3d" id="hero-3d" aria-label="A stack of copies of the company graph; one copy at a time plays the change"></div>
+        <a class="h-circle" id="hero-cta" href="#/rehearse"><span>Rehearse<br>a change</span></a>
+        <div class="h-ring" aria-hidden="true">
+          <svg viewBox="0 0 120 120"><defs><path id="ring-path" d="M60 60m-46 0a46 46 0 1 1 92 0a46 46 0 1 1-92 0"/></defs>
+            <text><textPath href="#ring-path">Fork · Play · Count · Clean up · Fork · Play · Count · Clean up ·</textPath></text></svg>
+          <svg class="h-ring-mark" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M5 21l11 5.5L27 21"/><path d="M5 10.5 16 5l11 5.5L16 16z"/></g></svg>
+        </div>
+        <p class="h-tag" id="hero-tag" aria-live="off"><span class="h-tag-k">Copy 1</span><span id="hero-tag-t">forking the company…</span></p>
+      </div>
+
+      <div class="h-col h-right">
+        <div class="cell h-carousel rv">
+          <div class="car-stage tilt" id="car-stage">
+            <span class="car-disc" aria-hidden="true"></span>
+            <div class="car-art" id="car-art"></div>
+          </div>
+          <button class="car-arrow prev" id="car-prev" type="button" aria-label="Previous scenario"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 12H4m6-6-6 6 6 6"/></svg></button>
+          <button class="car-arrow next" id="car-next" type="button" aria-label="Next scenario"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button>
+          <button class="car-cap" id="car-open" type="button"><span class="car-k" id="car-k">Scenario 1 of 9</span><span class="car-title" id="car-title">Clean up the old archive</span></button>
+        </div>
+        <div class="cell h-why rv">
+          <div class="h-circles" aria-hidden="true"><span class="i-git-fork"></span><span class="i-dice-5"></span><span class="i-check"></span></div>
+          <h2 class="split">Counted, never guessed</h2>
+          <p>Every square is a real copy of the company in FalkorDB: forked with GRAPH.COPY, played, counted and deleted. Same replay code, same futures.</p>
+          <div class="h-why-links"><button class="link-btn" id="home-tour" type="button">Take the 2-minute tour</button><a class="link-btn" href="#/how">How it works</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= REHEARSE -->
+  <section class="page" data-page="rehearse" aria-labelledby="h-rehearse">
+    <div class="rh" id="stage">
+      <aside class="rh-left">
+        <header class="cell page-head rv">
+          <span class="chap">01 / Rehearse</span>
+          <h1 id="h-rehearse" class="split">Rehearse a change</h1>
+          <p class="lede">Multiverse plays the change in many copies of the company graph and counts how often something important breaks. The real company is never touched.</p>
+        </header>
+        <div class="cell plan-bar rv" id="plan-bar">
+          <div class="plan-sentence" id="plan-sentence"></div>
+          <p class="plan-story" id="plan-story"></p>
+          <div class="add-step" id="add-step" hidden>
+            <div class="add-step-row" id="add-step-fields"></div>
+            <label class="field"><span>Replay code (optional)</span><input type="text" id="seed" inputmode="numeric" autocomplete="off" placeholder="e.g. 111280…"></label>
+            <p class="tiny faint">Same code + same plan = exactly the same futures.</p>
+            <button class="btn" id="add-step-btn" type="button"><span class="i-plus"></span>Add this step</button>
+          </div>
+          <div id="plan-notice" class="notice" hidden role="status"></div>
+        </div>
+        <div class="cell scen-cell rv">
+          <p class="cell-label">Scenarios</p>
+          <div class="scenario-row" id="scenarios" role="group" aria-label="Scenarios"></div>
+        </div>
+        <div class="cell run-cell rv">
+          <div class="run-opts">
+            <div class="seg" role="radiogroup" aria-label="How many futures" id="mode-seg">
+              <button type="button" role="radio" aria-checked="true" data-mode="decide" title="Keeps adding futures, 25 at a time, until it is sure which side of the 5% line the answer is on">Until sure</button>
+              <button type="button" role="radio" aria-checked="false" data-mode="100">100</button>
+              <button type="button" role="radio" aria-checked="false" data-mode="400">400</button>
+            </div>
+            <div class="run-links">
+              <button class="link-btn" id="add-step-toggle" type="button" aria-expanded="false"><span class="i-plus"></span>Add step</button>
+              <button class="link-btn danger" id="execute" type="button"><span class="i-shield"></span>Execute for real</button>
+            </div>
+          </div>
+          <button class="circle-btn magnetic" id="run" type="button"><span class="i-play"></span><span class="cb-t">Rehearse</span></button>
+        </div>
+      </aside>
+
+      <div class="rh-center graph-panel" id="rehearse-graph-panel">
+        <div class="panel-head">
+          <div class="panel-title"><h2 id="g1-title">Boutique Inc.</h2><span class="sub" id="g1-sub">The company as a graph</span></div>
+          <div class="graph-legend" aria-label="Legend">
+            <span><i class="lg-swatch"></i>service</span><span><i class="lg-swatch ds"></i>data</span><span><i class="lg-swatch job"></i>job</span><span><i class="lg-swatch sec"></i>secret</span><span><i class="lg-line dash"></i>not sure (%)</span>
+          </div>
+        </div>
+        <div class="graph-wrap">
+          <div class="graph" id="g-rehearse" aria-label="Company graph"></div>
+          <div class="graph-banner" id="future-banner" hidden></div>
+        </div>
+        <div class="pipeline" id="pipeline" aria-label="What Multiverse is doing"></div>
+      </div>
+
+      <div class="stage-col">
+        <div class="panel verdict" id="verdict" aria-live="polite"></div>
+        <div class="panel field-panel" id="field-panel">
+          <div class="panel-head">
+            <div class="panel-title"><h2>The multiverse</h2><span class="sub" id="field-sub">Each square is one copy of the company</span></div>
+            <button class="btn small ghost" id="stop" type="button" hidden><span class="i-stop"></span>Stop</button>
+          </div>
+          <div class="field-legend" id="field-legend"></div>
+          <div class="split-bar" id="split-bar" aria-hidden="true"></div>
+          <div class="futures" id="futures" role="list" aria-label="Futures"></div>
+          <p class="field-note" id="field-note">Sorted by outcome. Click a square to open it.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="details" id="details" hidden>
+      <div class="tabs" role="tablist" id="detail-tabs"></div>
+      <div class="details-body" id="detail-body"></div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= LAUNCH -->
+  <section class="page" data-page="launch" aria-labelledby="h-launch">
+    <div class="sheet">
+      <header class="sheet-head">
+        <div class="cell page-head rv">
+          <span class="chap">02 / Launch day</span>
+          <h1 id="h-launch" class="split">What breaks if traffic spikes?</h1>
+          <p class="lede">Load on each service = shoppers at the front door × the calls along every path to it. Past its measured capacity, it breaks.</p>
+        </div>
+        <div class="cell launch-bar rv" id="launch-controls">
+          <div class="slider-row">
+            <div class="row-top"><label for="l-surge">Expected traffic</label><span id="l-surge-v">3× normal</span></div>
+            <input type="range" id="l-surge" min="1" max="10" step="0.1" value="3">
+            <span class="tiny faint" id="l-surge-rps"></span>
+          </div>
+          <div class="slider-row">
+            <div class="row-top"><label for="l-p90">A bad day (1 in 10) could reach</label><span id="l-p90-v">6×</span></div>
+            <input type="range" id="l-p90" min="1" max="16" step="0.5" value="6">
+            <span class="tiny faint">How unsure the forecast is.</span>
+          </div>
+          <div class="field-pair">
+            <label class="field"><span>Starts</span><input type="datetime-local" id="l-start"></label>
+            <label class="field"><span>Hours</span><input type="number" id="l-hours" min="1" max="72" value="6"></label>
+          </div>
+        </div>
+        <div class="cell head-cta rv"><button class="circle-btn magnetic" id="launch-to-rehearse" type="button"><span class="i-play"></span><span class="cb-t">Rehearse<br>the launch</span></button></div>
+      </header>
+      <div class="sheet-body">
+        <div class="panel launch-graph rv">
+          <div class="panel-head">
+            <div class="panel-title"><h2>Load on each service at <span id="l-at">3×</span> normal traffic</h2><span class="sub">Badge = load as a share of capacity. Over 80% turns dark, over capacity turns orange.</span></div>
+          </div>
+          <div class="graph-wrap"><div class="graph" id="g-launch" aria-label="Company graph coloured by load"></div></div>
+        </div>
+        <div class="launch-grid">
+          <div class="panel launch-math rv">
+            <div class="launch-big"><span class="v-num num" id="l-theory">–</span><span class="muted" id="l-theory-sub">chance something critical breaks</span></div>
+            <p class="small muted" id="l-theory-why"></p>
+            <svg class="surge-chart" id="l-surge-chart" role="img" aria-label="How likely each traffic level is"></svg>
+            <div id="l-advice"></div>
+          </div>
+          <div class="panel rv">
+            <div class="panel-head"><div class="panel-title"><h2>Where each service breaks</h2><span class="sub">Traffic level (× normal) at which it runs out of capacity. The black line is the slider.</span></div></div>
+            <div class="headroom" id="headroom"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= AGENTS -->
+  <section class="page" data-page="agents" aria-labelledby="h-agents">
+    <div class="sheet">
+      <header class="sheet-head">
+        <div class="cell page-head rv">
+          <span class="chap">03 / Agents</span>
+          <h1 id="h-agents" class="split">Air traffic control for agents</h1>
+          <p class="lede">Agents propose plans instead of acting. Multiverse rehearses each plan alone and together with every plan that overlaps it, then clears it, holds it, or blocks it.</p>
+        </div>
+        <div class="cell head-actions rv">
+          <button class="btn primary" id="two-agents" type="button"><span class="i-play"></span>Run the two-agent demo</button>
+          <button class="btn" id="propose-current" type="button" title="Propose the plan from the Rehearse page"><span class="i-plane"></span>Propose current plan</button>
+          <div id="coord-notice" class="notice" hidden role="status"></div>
+        </div>
+        <div class="cell head-fact rv"><span class="h-num">2</span><span class="h-stat-l">plans that are each safe alone can be dangerous together</span></div>
+      </header>
+      <div class="sheet-body">
+        <div class="agents-grid">
+          <div class="panel rv">
+            <div class="panel-head"><div class="panel-title"><h2>Flight strips</h2><span class="sub">Every plan an agent proposed, newest first</span></div></div>
+            <div class="strips" id="strips"></div>
+          </div>
+          <div class="stage-col">
+            <div class="panel rv">
+              <div class="panel-head"><div class="panel-title"><h2>Schedule</h2><span class="sub">When each plan needs the company to itself</span></div></div>
+              <div class="schedule" id="schedule"></div>
+            </div>
+            <div class="panel rv" id="heat-panel" hidden>
+              <div class="panel-head"><div class="panel-title"><h2 id="heat-title">Safe start times</h2><span class="sub" id="heat-sub"></span></div></div>
+              <div class="schedule" id="heat"></div>
+            </div>
+          </div>
+        </div>
+        <div class="agents-grid">
+          <div class="panel rv">
+            <div class="panel-head"><div class="panel-title"><h2>Live tool calls</h2><span class="sub">Every call any AI agent makes to Multiverse, read from the memory graph</span></div><span class="dot live blink" aria-hidden="true"></span></div>
+            <ul class="feed" id="feed" aria-live="polite"></ul>
+          </div>
+          <div class="panel rv">
+            <div class="panel-head"><div class="panel-title"><h2>Connect a real AI agent</h2><span class="sub">It talks to Multiverse through MCP, like any tool</span></div></div>
+            <div class="connect" id="connect"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= COMPANY -->
+  <section class="page" data-page="company" aria-labelledby="h-company">
+    <div class="sheet">
+      <header class="sheet-head">
+        <div class="cell page-head rv">
+          <span class="chap">04 / Company</span>
+          <h1 id="h-company" class="split">The company graph</h1>
+          <p class="lede" id="company-lede">Boutique Inc. as a graph in FalkorDB, built only from evidence files. Click anything to see the exact file lines it came from.</p>
+        </div>
+        <div class="cell rv">
+          <p class="cell-label">Colour the graph by</p>
+          <div class="seg seg-list" role="radiogroup" aria-label="Colour the graph by" id="overlay-seg">
+            <button type="button" role="radio" aria-checked="true" data-ov="plain">Plain</button>
+            <button type="button" role="radio" aria-checked="false" data-ov="source">Real vs synthetic</button>
+            <button type="button" role="radio" aria-checked="false" data-ov="teams">Teams</button>
+            <button type="button" role="radio" aria-checked="false" data-ov="chokepoints" title="algo.betweenness">Chokepoints</button>
+            <button type="button" role="radio" aria-checked="false" data-ov="foundations" title="algo.pageRank">Foundations</button>
+            <button type="button" role="radio" aria-checked="false" data-ov="islands" title="algo.WCC">Islands</button>
+          </div>
+        </div>
+        <div class="cell rv">
+          <p class="cell-label">Ask the graph</p>
+          <form class="ask-box" id="ask-form" autocomplete="off">
+            <input type="text" id="ask-input" name="question" placeholder="e.g. which jobs read orders_replica?" aria-label="Ask the graph a question">
+            <button class="btn" type="submit"><span class="i-ask"></span>Ask</button>
+          </form>
+        </div>
+        <div class="cell path-cell rv">
+          <p class="cell-label">Path finder</p>
+          <div class="path-row"><select id="path-a" aria-label="From asset"></select><span class="faint">to</span><select id="path-b" aria-label="To asset"></select></div>
+          <button class="btn small" id="path-go" type="button"><span class="i-route"></span>Find the path</button>
+          <span class="small muted" id="path-out"></span>
+        </div>
+      </header>
+      <div class="sheet-body">
+        <div class="company-grid">
+          <div class="panel company-graph rv">
+            <div id="ask-result" class="ask-result" hidden></div>
+            <div class="toolbar" id="overlay-legend"></div>
+            <div class="graph-wrap"><div class="graph" id="g-company" aria-label="Company graph"></div></div>
+          </div>
+          <aside class="panel inspector" id="inspector" aria-label="Details" hidden></aside>
+        </div>
+        <div class="company-row">
+          <div class="panel rv">
+            <div class="panel-head"><div class="panel-title"><h2>Cleanup finder</h2><span class="sub">Found with graph algorithms, then checked with a real rehearsal each</span></div>
+              <button class="btn small" id="cleanup" type="button"><span class="i-play"></span>Check each one</button></div>
+            <ul class="rows" id="candidates"></ul>
+          </div>
+          <div class="panel rv">
+            <div class="panel-head"><div class="panel-title"><h2>Found in Google's real Kubernetes file</h2><span class="sub">Problems the importer noticed</span></div></div>
+            <div id="findings" class="panel-body" style="display:grid;gap:12px"></div>
+          </div>
+          <div class="panel rv">
+            <div class="panel-head"><div class="panel-title"><h2>What the graph holds</h2><span class="sub" id="counts-sub"></span></div></div>
+            <div class="counts" id="counts"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= INBOX -->
+  <section class="page" data-page="inbox" aria-labelledby="h-inbox">
+    <div class="sheet">
+      <header class="sheet-head">
+        <div class="cell page-head rv">
+          <span class="chap">05 / Inbox</span>
+          <h1 id="h-inbox" class="split">Questions for the teams</h1>
+          <p class="lede">When a verdict depends on a link nobody is sure about, Multiverse asks the team that owns it. Answers go into the memory graph, and every later rehearsal uses them instead of guessing.</p>
+        </div>
+        <div class="cell head-fact rv"><span class="h-num" id="inbox-count">0</span><span class="h-stat-l">questions waiting for a team</span></div>
+      </header>
+      <div class="sheet-body">
+        <div class="inbox-grid">
+          <div class="panel rv">
+            <div class="panel-head"><div class="panel-title"><h2>Waiting for an answer</h2><span class="sub">Answer as the owning team</span></div></div>
+            <div id="questions"></div>
+          </div>
+          <div class="panel rv">
+            <div class="panel-head"><div class="panel-title"><h2>What Multiverse has learned</h2><span class="sub">Kept across sessions</span></div></div>
+            <ul class="timeline" id="learned"></ul>
+          </div>
+        </div>
+        <div class="inbox-grid">
+          <div class="panel rv">
+            <div class="panel-head"><div class="panel-title"><h2>Recent rehearsals</h2><span class="sub">From the console, AI agents and the command line. Click one to open it.</span></div></div>
+            <ul class="rows" id="recent"></ul>
+          </div>
+          <div class="panel rv">
+            <div class="panel-head"><div class="panel-title"><h2>History of one asset</h2><span class="sub">Everything memory holds about it</span></div><select id="mem-asset" aria-label="Asset"></select></div>
+            <ul class="timeline" id="history"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================= HOW -->
+  <section class="page" data-page="how" aria-labelledby="h-how">
+    <div class="sheet">
+      <header class="sheet-head">
+        <div class="cell page-head rv">
+          <span class="chap">06 / How it works</span>
+          <h1 id="h-how" class="split">Six steps, all in FalkorDB</h1>
+          <p class="lede">The commands below are the real ones. Open a rehearsal's Commands tab to see them with live timings.</p>
+        </div>
+        <div class="cell head-cta rv"><button class="circle-btn magnetic" id="how-tour" type="button"><span class="i-tour"></span><span class="cb-t">Show me<br>the tour</span></button></div>
+      </header>
+      <div class="sheet-body">
+        <ol class="how-steps" id="how-steps"></ol>
+        <div class="two-col">
+          <div class="panel rv">
+            <div class="panel-head"><div class="panel-title"><h2>FalkorDB features used</h2><span class="sub">And where</span></div></div>
+            <ul class="feature-list" id="features"></ul>
+          </div>
+          <div class="panel rv">
+            <div class="panel-head"><div class="panel-title"><h2>What is real and what is invented</h2><span class="sub">Labelled everywhere in the app</span></div></div>
+            <ul class="feature-list" id="realness"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="cursor" id="cursor" aria-hidden="true"><span id="cursor-t">Open</span></div>
+<div id="palette-root" hidden></div>
+<div id="dialog-root" hidden></div>
+<div id="spot" class="spot" hidden></div>
+<div id="coach" class="coach" role="dialog" aria-live="polite" aria-label="Tour" hidden></div>
+<div id="toasts" class="toasts" aria-live="polite"></div>
+<div id="tip" class="tip" role="tooltip" hidden></div>
+
+<script src="/static/icons.js?v=5"></script>
+<script src="/static/graph.js?v=5"></script>
+<script src="/static/app.js?v=5"></script>
+<script src="/static/motion.js?v=5"></script>
+<script type="module" src="/static/hero3d.js?v=5"></script>
+</body>
+</html>

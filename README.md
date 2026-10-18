@@ -11,8 +11,8 @@ The real company is never touched, and every number on screen is counted from re
 
 | | |
 |---|---|
-| **Demo video** | _link coming_ |
-| **Live demo** | _link coming_ |
+| **Demo video** | [youtu.be/xh497r3bZTY](https://youtu.be/xh497r3bZTY) |
+| **Live demo** | [multiverse-cqzs.onrender.com](https://multiverse-cqzs.onrender.com) (free server: the first visit can take up to a minute to wake up) |
 | **Tracks entered** | 01 Agents That Act on Connected Data · 02 Agent Memory and Coordination · 03 Company Brain |
 | **Built for** | Graph Hacks by WeMakeDevs × FalkorDB, 15–18 October 2026 |
 
